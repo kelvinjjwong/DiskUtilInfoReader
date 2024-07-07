@@ -19,5 +19,6 @@ let package = Package(
         .testTarget(
             name: "DiskUtilInfoReaderTests",
             dependencies: ["DiskUtilInfoReader"]),
-    ]
+    ],
+    swiftLanguageVersions: [.v5]
 )
