@@ -167,7 +167,10 @@ else
     echo "pod trunk push $PODSPEC"
     echo
     echo "OR install GitHub CLI to automate these steps:"
+    echo
     echo "brew install gh"
+    echo "gh auth login"
+    echo
     echo "https://cli.github.com"
     echo
 fi
