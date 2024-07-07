@@ -1,3 +1,7 @@
+GIT_USER="kelvinjjwong"
+GIT_REPOSITORY="DiskUtilInfoReader"
+GIT_BASE_BRANCH="main"
+
 if [[ "$1" = "help" ]] || [[ "$1" = "--help" ]]  || [[ "$1" = "--?" ]]; then
    echo "Sample:"
    echo "./build_pod.sh"
@@ -11,6 +15,19 @@ if [[ "$1" = "help" ]] || [[ "$1" = "--help" ]]  || [[ "$1" = "--?" ]]; then
    echo "./build_pod.sh version down revision"
    echo
    exit 0
+fi
+
+xcodebuild -version
+if [[ $? -ne 0 ]]; then
+    if [[ -e /Applications/Xcode.app/Contents/Developer ]]; then
+        sudo xcode-select -s /Applications/Xcode.app/Contents/Developer
+        xcodebuild -version
+        if [[ $? -ne 0 ]]; then
+            exit -1
+        fi
+    else
+        exit -1
+    fi
 fi
 
 versionPos="revision"
@@ -82,6 +99,13 @@ fi
 GIT_BRANCH=`git status | grep "On branch" | head -1 | awk -F' ' '{print $NF}'`
 CURRENT_VERSION=`grep s.version $PODSPEC | head -1 | awk -F' ' '{print $NF}' | sed 's/"//g'`
 
+GIT_REMOTE_REPO=`git config --get remote.origin.url`
+if [ "$GIT_REMOTE_REPO" = "" ]; then
+    git remote add origin git@github.com:${GIT_USER}/${GIT_REPOSITORY}.git
+    git branch -M ${GIT_BASE_BRANCH}
+    git push -u origin ${GIT_BASE_BRANCH}
+fi
+
 EXIST_TAG=`git ls-remote --tags origin | tr '/' ' ' | awk -F' ' '{print $NF}' | grep $CURRENT_VERSION`
 if [[ "$EXIST_TAG" != "" ]]; then
     echo "$CURRENT_VERSION already exist in git repository. Aborted following build steps to avoid duplication."
@@ -113,7 +137,7 @@ fi
 GH=`which gh`
 if [[ "$GH" != "" ]]; then
     gh pr status
-    gh pr create --title "$CURRENT_VERSION" --body "**Full Changelog**: https://github.com/kelvinjjwong/DiskUtilInfoReader/compare/$PREV_VERSION...$CURRENT_VERSION"
+    gh pr create --title "$CURRENT_VERSION" --body "**Full Changelog**: https://github.com/${GIT_USER}/${GIT_REPOSITORY}/compare/$PREV_VERSION...$CURRENT_VERSION"
     gh pr list
     GH_PR=`gh pr list | tail -1 | tr '#' ' ' | awk -F' ' '{print $1}'`
     gh pr merge $GH_PR -m
@@ -122,7 +146,7 @@ if [[ "$GH" != "" ]]; then
     fi
     gh pr status
     git pull
-    git checkout master
+    git checkout ${GIT_BASE_BRANCH}
     git pull
     gh release create $CURRENT_VERSION --generate-notes
     if [[ $? -ne 0 ]]; then
@@ -143,7 +167,10 @@ else
     echo "pod trunk push $PODSPEC"
     echo
     echo "OR install GitHub CLI to automate these steps:"
+    echo
     echo "brew install gh"
+    echo "gh auth login"
+    echo
     echo "https://cli.github.com"
     echo
 fi
