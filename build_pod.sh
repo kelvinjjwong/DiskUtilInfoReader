@@ -1,3 +1,6 @@
+GIT_USER="kelvinjjwong"
+GIT_REPOSITORY="DiskUtilInfoReader"
+
 if [[ "$1" = "help" ]] || [[ "$1" = "--help" ]]  || [[ "$1" = "--?" ]]; then
    echo "Sample:"
    echo "./build_pod.sh"
@@ -82,6 +85,13 @@ fi
 GIT_BRANCH=`git status | grep "On branch" | head -1 | awk -F' ' '{print $NF}'`
 CURRENT_VERSION=`grep s.version $PODSPEC | head -1 | awk -F' ' '{print $NF}' | sed 's/"//g'`
 
+GIT_REMOTE_REPO=`git config --get remote.origin.url`
+if [ "$GIT_REMOTE_REPO" = "" ]; then
+    git remote add origin git@github.com:${GIT_USER}/${GIT_REPOSITORY}.git
+    git branch -M main
+    git push -u origin main
+fi
+
 EXIST_TAG=`git ls-remote --tags origin | tr '/' ' ' | awk -F' ' '{print $NF}' | grep $CURRENT_VERSION`
 if [[ "$EXIST_TAG" != "" ]]; then
     echo "$CURRENT_VERSION already exist in git repository. Aborted following build steps to avoid duplication."
@@ -113,7 +123,7 @@ fi
 GH=`which gh`
 if [[ "$GH" != "" ]]; then
     gh pr status
-    gh pr create --title "$CURRENT_VERSION" --body "**Full Changelog**: https://github.com/kelvinjjwong/DiskUtilInfoReader/compare/$PREV_VERSION...$CURRENT_VERSION"
+    gh pr create --title "$CURRENT_VERSION" --body "**Full Changelog**: https://github.com/${GIT_USER}/${GIT_REPOSITORY}/compare/$PREV_VERSION...$CURRENT_VERSION"
     gh pr list
     GH_PR=`gh pr list | tail -1 | tr '#' ' ' | awk -F' ' '{print $1}'`
     gh pr merge $GH_PR -m
