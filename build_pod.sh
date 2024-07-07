@@ -1,5 +1,6 @@
 GIT_USER="kelvinjjwong"
 GIT_REPOSITORY="DiskUtilInfoReader"
+GIT_BASE_BRANCH="main"
 
 if [[ "$1" = "help" ]] || [[ "$1" = "--help" ]]  || [[ "$1" = "--?" ]]; then
    echo "Sample:"
@@ -88,8 +89,8 @@ CURRENT_VERSION=`grep s.version $PODSPEC | head -1 | awk -F' ' '{print $NF}' | s
 GIT_REMOTE_REPO=`git config --get remote.origin.url`
 if [ "$GIT_REMOTE_REPO" = "" ]; then
     git remote add origin git@github.com:${GIT_USER}/${GIT_REPOSITORY}.git
-    git branch -M main
-    git push -u origin main
+    git branch -M ${GIT_BASE_BRANCH}
+    git push -u origin ${GIT_BASE_BRANCH}
 fi
 
 EXIST_TAG=`git ls-remote --tags origin | tr '/' ' ' | awk -F' ' '{print $NF}' | grep $CURRENT_VERSION`
@@ -132,7 +133,7 @@ if [[ "$GH" != "" ]]; then
     fi
     gh pr status
     git pull
-    git checkout master
+    git checkout ${GIT_BASE_BRANCH}
     git pull
     gh release create $CURRENT_VERSION --generate-notes
     if [[ $? -ne 0 ]]; then
