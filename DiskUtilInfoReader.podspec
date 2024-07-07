@@ -1,6 +1,6 @@
 Pod::Spec.new do |s|
   s.name        = "DiskUtilInfoReader"
-  s.version     = "1.0.0"
+  s.version     = "1.0.1"
   s.summary     = "A library for reading info from diskutil in macOS platform."
   s.homepage    = "https://github.com/kelvinjjwong/DiskUtilInfoReader"
   s.license     = { :type => "MIT" }
