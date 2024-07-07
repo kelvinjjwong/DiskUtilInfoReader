@@ -17,6 +17,19 @@ if [[ "$1" = "help" ]] || [[ "$1" = "--help" ]]  || [[ "$1" = "--?" ]]; then
    exit 0
 fi
 
+xcodebuild -version
+if [[ $? -ne 0 ]]; then
+    if [[ -e /Applications/Xcode.app/Contents/Developer ]]; then
+        sudo xcode-select -s /Applications/Xcode.app/Contents/Developer
+        xcodebuild -version
+        if [[ $? -ne 0 ]]; then
+            exit -1
+        fi
+    else
+        exit -1
+    fi
+fi
+
 versionPos="revision"
 versionChange=0
 if [[ "$1 $2" = "version up" ]]; then
